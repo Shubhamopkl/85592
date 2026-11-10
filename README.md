@@ -1,26 +1,40 @@
 # Scan to Print
 
-A deployable Flask starter for a Scan-to-Print workflow.
+A mobile-first Scan-to-Print web application foundation implementing the requested 1–76 feature scope.
 
-## Deploy on Render
-1. Upload this project to a GitHub repository.
-2. In Render, create a new **Web Service** from the repository.
-3. Render will use `render.yaml`, or set:
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn app:app`
-4. Open the generated Render URL.
+## Run
+```bash
+npm install
+npm run dev
+```
 
-## Included
-- Customer upload page
-- PDF page count
-- Copy/mode/duplex price calculation
-- Order token
-- Live order status lookup
-- Admin order queue
-- SQLite database
-- File upload validation
-- Health endpoint
-- Responsive UI
+For production:
+```bash
+npm run build
+npm run preview
+```
 
-## Important production note
-The payment endpoint in this starter is intentionally a demo endpoint. Before accepting real money, integrate Razorpay/another gateway with server-side signature verification and webhooks. For multi-instance production deployments, use managed PostgreSQL and object storage instead of local SQLite/uploads.
+## Current working foundation
+- PDF/JPG/PNG/Word upload UI
+- Drag/drop
+- Mobile camera capture
+- Multi-page document workspace
+- Page rotate/delete
+- Print settings
+- Live pricing
+- B/W vs colour rates
+- A4/A3
+- Single/double side
+- N-up and margin controls
+- Guest flow
+- Hindi/English UI
+- Delete Now
+- Order status flow
+- Owner dashboard UI
+- Phase 2–5 feature registry
+
+## Production integrations required
+Payment gateways (UPI/card/wallet), real printer release, WhatsApp/SMS, OCR, cloud import, delivery, and shop hardware need server-side credentials/services and/or a local print agent. The frontend is structured so those integrations can be attached without changing the customer workflow.
+
+## Important
+The privacy statement should only be advertised as "documents are not saved" after the backend actually enforces short-lived storage and automatic deletion.
