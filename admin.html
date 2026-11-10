@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin • Scan to Print</title><link rel="stylesheet" href="/static/style.css"></head>
+<body><div class="shell"><header><div class="brand">SCAN <span>TO PRINT</span></div><a href="/">Customer</a></header>
+<main><section class="hero"><p class="eyebrow">ADMIN</p><h1>Print Queue</h1><p>Simple order monitor for your first deployment.</p></section>
+<section class="card"><button id="refresh">Refresh</button><div class="tablewrap"><table><thead><tr><th>Token</th><th>File</th><th>Pages</th><th>Copies</th><th>Mode</th><th>Payment</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div></section></main>
+<footer>Scan to Print Admin</footer></div>
+<script>
+async function load(){const r=await fetch("/api/orders");const d=await r.json();rows.innerHTML=d.orders.map(o=>`<tr><td>${o.token}</td><td>${o.original_name}</td><td>${o.pages}</td><td>${o.copies}</td><td>${o.mode}</td><td>${o.payment_status}</td><td>${o.status}</td><td><select onchange="setStatus('${o.token}',this.value)"><option>queued</option><option>printing</option><option>completed</option><option>failed</option><option>cancelled</option></select></td></tr>`).join("")}
+async function setStatus(t,s){await fetch("/api/order/"+t+"/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:s})});load()}
+refresh.onclick=load;load();
+</script></body></html>

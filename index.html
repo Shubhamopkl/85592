@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scan to Print</title><link rel="stylesheet" href="/static/style.css">
+</head><body>
+<div class="shell">
+<header><div class="brand">SCAN <span>TO PRINT</span></div><a href="/admin">Admin</a></header>
+<main>
+<section class="hero"><p class="eyebrow">FAST • SIMPLE • SECURE</p><h1>Upload. Configure. Print.</h1>
+<p>Prepare your document and send it to the print queue.</p></section>
+<section class="card">
+<div class="step"><b>1</b><span>Upload document</span></div>
+<input id="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp">
+<div id="fileInfo" class="info">No file selected</div>
+<div class="grid">
+<label>Copies<input id="copies" type="number" min="1" value="1"></label>
+<label>Print mode<select id="mode"><option value="bw">Black & White</option><option value="color">Color</option></select></label>
+</div>
+<label class="check"><input id="duplex" type="checkbox"> Double-sided (duplex)</label>
+<div class="price"><span>Estimated price</span><strong id="price">₹0.00</strong></div>
+<button id="uploadBtn">Upload & Continue</button>
+<div id="result" class="result hidden"></div>
+</section>
+<section class="card">
+<div class="step"><b>2</b><span>Order status</span></div>
+<div class="statusrow"><input id="token" placeholder="Enter token e.g. A1B2C3D4"><button id="trackBtn" class="secondary">Track</button></div>
+<div id="status" class="info">Your token will appear after upload.</div>
+</section>
+</main>
+<footer>© 2026 Scan to Print</footer>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+let token=null,pages=1;
+function calc(){const c=Math.max(1,+$("#copies").value||1), m=$("#mode").value; const rate=m==="color"?5:2;
+$("#price").textContent="₹"+(pages*c*rate).toFixed(2);}
+$("#file").addEventListener("change",()=>{$("#fileInfo").textContent=$("#file").files[0]?.name||"No file selected"});
+["copies","mode","duplex"].forEach(id=>$("#"+id).addEventListener("input",calc));
+$("#uploadBtn").onclick=async()=>{
+ const f=$("#file").files[0]; if(!f){alert("Please select a document.");return}
+ const fd=new FormData();fd.append("file",f);
+ $("#uploadBtn").disabled=true;$("#uploadBtn").textContent="Uploading...";
+ try{
+  const r=await fetch("/api/upload",{method:"POST",body:fd});const d=await r.json();
+  if(!r.ok)throw Error(d.error||"Upload failed");
+  token=d.token;pages=d.pages;$("#token").value=token;$("#fileInfo").textContent=f.name+" • "+pages+" page(s)";
+  await updateOrder();$("#result").classList.remove("hidden");$("#result").innerHTML=`<b>Token: ${token}</b><br>Upload complete. Proceed to payment when your payment gateway is connected.`;
+  loadStatus();
+ }catch(e){alert(e.message)}finally{$("#uploadBtn").disabled=false;$("#uploadBtn").textContent="Upload & Continue";}
+};
+async function updateOrder(){if(!token)return;await fetch("/api/order/"+token,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pages,copies:+$("#copies").value||1,mode:$("#mode").value,duplex:$("#duplex").checked})});calc();}
+async function loadStatus(){if(!token)return;const r=await fetch("/api/order/"+token);const d=await r.json();$("#status").innerHTML=r.ok?`<b>${d.status.toUpperCase()}</b> • Payment: ${d.payment_status} • Total: ₹${Number(d.total).toFixed(2)}`:d.error;}
+$("#trackBtn").onclick=()=>{token=$("#token").value.trim().toUpperCase();loadStatus()};
+calc();
+</script></body></html>
